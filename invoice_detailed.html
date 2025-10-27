@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детализированный счёт {{ invoice_id }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+        
+        body {
+            font-family: 'DejaVu Sans', 'Roboto', Arial, sans-serif;
+            color: #2c3e50;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 100%;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            margin: -1.5cm -1.5cm 30px -1.5cm;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .header .invoice-number {
+            font-size: 18px;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        
+        .company-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .company-info h2 {
+            margin: 0 0 10px 0;
+            color: #667eea;
+            font-size: 20px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .info-box {
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .info-box h3 {
+            margin: 0 0 15px 0;
+            color: #667eea;
+            font-size: 16px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        
+        .info-item {
+            margin: 8px 0;
+            display: flex;
+        }
+        
+        .info-item .label {
+            font-weight: bold;
+            min-width: 100px;
+            color: #7f8c8d;
+        }
+        
+        .info-item .value {
+            flex: 1;
+        }
+        
+        .items-section {
+            margin: 30px 0;
+        }
+        
+        .items-section h2 {
+            color: #2c3e50;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .items-table thead {
+            background: #667eea;
+            color: white;
+        }
+        
+        .items-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .items-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        
+        .items-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .items-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        {% if items %}
+        .summary {
+            margin-top: 30px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        .summary-row.total {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            border-top: 2px solid #667eea;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        {% endif %}
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e8ed;
+            text-align: center;
+            color: #7f8c8d;
+        }
+        
+        .footer .thank-you {
+            font-size: 18px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Счёт-фактура</h1>
+            <div class="invoice-number">Документ № {{ invoice_id }}</div>
+        </div>
+        
+        <div class="company-info">
+            <h2>{{ company_name }}</h2>
+            <p>Официальный счёт на оплату товаров и услуг</p>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-box">
+                <h3>Информация о клиенте</h3>
+                <div class="info-item">
+                    <span class="label">Клиент:</span>
+                    <span class="value">{{ customer_name }}</span>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h3>Детали документа</h3>
+                <div class="info-item">
+                    <span class="label">Дата:</span>
+                    <span class="value">{{ date }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Номер:</span>
+                    <span class="value">{{ invoice_id }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="items-section">
+            <h2>Позиции счёта</h2>
+            
+            {% if items %}
+            <!-- Для JSON данных с массивом items -->
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Наименование</th>
+                        <th class="text-center">Кол-во</th>
+                        <th class="text-right">Цена за ед.</th>
+                        <th class="text-right">Сумма</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.item_name }}</td>
+                        <td class="text-center">{{ item.quantity }} шт.</td>
+                        <td class="text-right">{{ "{:,.0f}".format(item.price) }} ₽</td>
+                        <td class="text-right">{{ "{:,.0f}".format(item.total) }} ₽</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="summary">
+                <div class="summary-row">
+                    <span>Промежуточный итог:</span>
+                    <span>{{ "{:,.0f}".format(subtotal) }} ₽</span>
+                </div>
+                <div class="summary-row">
+                    <span>НДС (20%):</span>
+                    <span>{{ "{:,.0f}".format(tax) }} ₽</span>
+                </div>
+                <div class="summary-row total">
+                    <span>ИТОГО К ОПЛАТЕ:</span>
+                    <span>{{ "{:,.0f}".format(total) }} ₽</span>
+                </div>
+            </div>
+            {% else %}
+            <!-- Для CSV данных с одной позицией -->
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Наименование</th>
+                        <th class="text-center">Кол-во</th>
+                        <th class="text-right">Цена за ед.</th>
+                        <th class="text-right">Сумма</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ item_name }}</td>
+                        <td class="text-center">{{ quantity }} шт.</td>
+                        <td class="text-right">{{ "{:,.0f}".format(price) }} ₽</td>
+                        <td class="text-right">{{ "{:,.0f}".format(total) }} ₽</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="summary">
+                <div class="summary-row total">
+                    <span>ИТОГО К ОПЛАТЕ:</span>
+                    <span>{{ "{:,.0f}".format(total) }} ₽</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="footer">
+            <div class="thank-you">Благодарим за сотрудничество!</div>
+            <p>Этот документ создан автоматически и имеет юридическую силу без подписи.</p>
+            <p style="font-size: 12px; margin-top: 20px;">
+                © 2025 {{ company_name }}. Все права защищены.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+
